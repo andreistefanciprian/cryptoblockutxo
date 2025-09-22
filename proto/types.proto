@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+option go_package = "github.com/andreistefanciprian/cryptoblockutxo/proto";
+
+message Block {
+    Header header = 1;
+    repeated Transaction transactions = 2;
+}
+
+message Header {
+    int32 version = 1; // Block version
+    int32 height = 2; // Block height/number
+    bytes prevHash = 3; // Previous block hash
+    bytes rootHash = 4; // Merkle root hash
+    int64 timestamp = 5; // Block creation timestamp
+}
+
+message Transaction {}
+

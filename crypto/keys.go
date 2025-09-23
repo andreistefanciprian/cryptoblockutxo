@@ -8,10 +8,11 @@ import (
 )
 
 const (
-	privKeyLen = 64
-	pubKeyLen  = 32
-	seedLen    = 32
-	addressLen = 20
+	privKeyLen   = 64
+	signatureLen = 64
+	pubKeyLen    = 32
+	seedLen      = 32
+	addressLen   = 20
 )
 
 type PrivateKey struct {
@@ -53,23 +54,37 @@ func (p *PrivateKey) Sign(msg []byte) *Signature {
 func (p *PrivateKey) Public() *PublicKey {
 	b := make([]byte, pubKeyLen)
 	copy(b, p.key[32:])
-	return &PublicKey{Key: b}
+	return &PublicKey{key: b}
 }
 
 type PublicKey struct {
-	Key ed25519.PublicKey
+	key ed25519.PublicKey
+}
+
+func PublicKeyFromBytes(b []byte) *PublicKey {
+	if len(b) != pubKeyLen {
+		panic("public key length must be 32 bytes")
+	}
+	return &PublicKey{key: ed25519.PublicKey(b)}
 }
 
 func (p *PublicKey) Address() *Address {
-	return &Address{value: p.Key[len(p.Key)-addressLen:]}
+	return &Address{value: p.key[len(p.key)-addressLen:]}
 }
 
 func (p *PublicKey) Bytes() []byte {
-	return p.Key
+	return p.key
 }
 
 type Signature struct {
 	value []byte
+}
+
+func SignatureFromBytes(b []byte) *Signature {
+	if len(b) != signatureLen {
+		panic("signature length must be 64 bytes")
+	}
+	return &Signature{value: b}
 }
 
 func (s *Signature) Bytes() []byte {
@@ -77,7 +92,7 @@ func (s *Signature) Bytes() []byte {
 }
 
 func (s *Signature) Verify(pubKey *PublicKey, msg []byte) bool {
-	return ed25519.Verify(pubKey.Key, msg, s.value)
+	return ed25519.Verify(pubKey.key, msg, s.value)
 }
 
 type Address struct {
